@@ -1,2 +1,5 @@
 #git ignores all the files present in git ignore
 node_modules/
+#to save the snapshot we use command git commit....
+#now we have to create an online repo so that we can send the local  code to that online repo 
+#there are many commands available through which we can connect github to the local repo 

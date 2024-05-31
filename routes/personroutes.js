@@ -97,3 +97,6 @@ module.exports=router
 //git status red files means all these files we havent saved yet,that means all these files are untracked until now 
 //we havent added them in the git here all files became green that means git is watching if there are any changes being 
 //made that means a tracker is being set to see if any changes are being madea
+//here nodemodules are just the dependencies which we are installing,using in the local system so no need to keep track 
+//of the node modules because we dont make any changes in it npm looks after it 
+//hence we want git to never track node modules 

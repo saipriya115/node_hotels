@@ -1,0 +1,2 @@
+#git ignores all the files present in git ignore
+node_modules/

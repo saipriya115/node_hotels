@@ -2,7 +2,8 @@
 const mongoose=require('mongoose')
 //just like nodejs server runs at a specific port number similarily mongodbserver also has a port called _____
 //define the mongodb connection url 
-const mongourl='mongodb://localhost:27017/person'
+const mongourl='mongodb://localhost:27017/person'//we have set a local server so we got local url ,if online we will get
+//const mongourl='mongodb+srv://saipriyavangapandu:<hotel>@hotel.6qevfcj.mongodb.net/'//that url we can simply paste that 
 //set up mongodb connection
 mongoose.connect(mongourl,{
     useNewUrlParser: true,

@@ -75,6 +75,29 @@ const menuitem=require('./models/menuitem')
 const personroutes=require('./routes/personroutes')
 const menuroutes=require('./routes/menuroutes')
 
+
+const passport=require('./auth')
+
+
+app.use(passport.initialize())
+//session is false it will not work but when you pass it as parameters it does work because in that case local strategy
+//will take username and password through req.body and will match them with that of database 
+
+//middlewere function 
+const logrequest=(req,res,next)=>{
+  console.log(`[${new Date().toLocaleString()}] request made to ${req.originalUrl}`)
+  //we want here above time to be printed and url to be printed,konse url pe hit ho raha hain 
+  next()
+}
+//if next is not there you will not go to next part that means you will not go to response part
+//whwnever request is initiated middliwere works
+//now i will username,password authentication in the below function as an middleware 
+const passportmiddlewere=passport.authenticate('local',{session:false})
+app.get('/',(req,res)=>{
+  //here inside password authentication you have to pass strategy as a parameter which is localstrategy and session
+  res.send('welcome to our hotel ')
+})
+app.use(logrequest)//if you want to use this for every route not only '/' this route
 //app.get('/',(req,res)=>{ 
     
   //  var idli={
@@ -118,8 +141,9 @@ const menuroutes=require('./routes/menuroutes')
   //})
 
  //})
- app.use('/person',personroutes)
- app.use('/menu',menuroutes)
+ app.use('/person',passportmiddlewere,personroutes)
+ app.use('/menu',menuroutes)//in this case we have kept password local strategy as middlewere here
+ //and it will check authentication for all the routes defined in menu `
  
  app.listen(3000,()=>{
   console.log("hello server")//tells us that server is alive
@@ -130,12 +154,21 @@ const menuroutes=require('./routes/menuroutes')
 //might have to wait until the persons data is fetched also it might take time to save persons data
 //we have to wait until persons data is saved becaused we need to send response as well that persondata is saved or not
 //that means we have to wait until some operations takes place-async and wait 
+//now here we cannot use plain text as password because it could be easily hacked by anybody
+//so we use here bcrypt,what does bcrypt do is-it converts the plain text into some random string by applying hash function
+//password salt hashing-along with the password we also add some salt from our side(salt means some type of string)
+//after that it is given to hashing algorithm and it generated random string also the salt is hidden in that random string
+
+//now this hashed password+salt is stored in the database 
+//we hash the password before saving it to the database
+//now we must hash the password before saving it to the database 
+//again here we use a mongoose middlewere called pre middleware Pre-Save Middleware: The userSchema.pre('save', async function(next) { ... }) function is used to add pre-save middleware. This middleware will run every time a save operation is called on a User document.
+//Check Password Modification: The this.isModified('password') || this.isNew check ensures that the password is only hashed if it has been modified or if the document is new. This prevents rehashing an already hashed password on subsequent saves.
+//hence password hashing is done automatically whenever user document is saved or updated 
 
 //now what if we want to get the persons data on get method 
 
-
- 
- //here for everything we cannot make an end point like person/chef so we will use parametrized url 
+//here for everything we cannot make an end point like person/chef so we will use parametrized url 
  
  //express router is helpfull to modularize and organize your route handling code in node js application
  //update operation -put method 
@@ -144,4 +177,20 @@ const menuroutes=require('./routes/menuroutes')
  //so to update first we need to find the document through unique id which is provided by 
  //mongodb  then we have to update it 
  //delete operation 
- 
+ //middlewere whenever you make a request to server and you get a response in between many process may happen which refers
+ //to middlewhere 
+ //for example if we want all the requests send to the server to be logged ,logging means kiss date or time pe konsa user 
+ //hit kiya ,website ko enter kiya 
+ //body parser,authentication,logging,modifying request data comes under middlewere 
+ //authentication-to enter into hotel ,we will check is he even part of company
+ //authorization-limited access ,if he is part of company what he is 
+ //in nodejs we implement authentication using passport,passport is like third party middleware which will check the 
+ //credentials of user,whenever user enters username and password passport checks if that username and password are
+ //correct ,authentication establishes identity and authorization defines the permissions associated with that identity
+ //so we will implement authentication as the middlewere function 
+ //passport provides the flexibility for different strategies like through username or password or through direct google etc
+ //here now we are going to use local strategy where we identify the authentication of user based on username and password
+//now how the passport will check the username and password,it will get it from request.body 
+//now in local strategy we need some kind of verification function which determines that whether the username and password
+//we are getting are valid or not 
+//bad request means some requirements are not enough to enter into that endpoint 

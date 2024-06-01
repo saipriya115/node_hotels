@@ -35,3 +35,9 @@ router.get('/',async (req,res)=>{//here we are using async because there is cert
     
 module.exports=router 
 //comment added for testing 
+//when we check we know that everything is saved locally but to like save it in github we use git push 
+//now if another person is making changes on same repository then we want that in our local too then we can use command git 
+//pull means pull the online repo into local 
+//now we know that we have database and database server locally now how to keep them online so that everybody can access
+//it ,we have set up the database server locally through which we are performing these database operations 
+//so online where database server is present on that we have to add our database so that it is accessible to everyone

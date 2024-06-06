@@ -139,9 +139,9 @@ app.use(logrequest)//if you want to use this for every route not only '/' this r
     //res.status(200).json(savedperson)
     //}
   //})
-
+  
  //})
- app.use('/person',passportmiddlewere,personroutes)
+ app.use('/person',personroutes)
  app.use('/menu',menuroutes)//in this case we have kept password local strategy as middlewere here
  //and it will check authentication for all the routes defined in menu `
  
@@ -194,3 +194,64 @@ app.use(logrequest)//if you want to use this for every route not only '/' this r
 //now in local strategy we need some kind of verification function which determines that whether the username and password
 //we are getting are valid or not 
 //bad request means some requirements are not enough to enter into that endpoint 
+//now since every route is authenticated we should enter username and password for everything but here inside flipkart
+//but when directing to some pages like coupons etc inside flipkart we are not entering username and password how?
+//so for that sessions and tokens are helpfull,these are also usefull to track the users status suppose you added soething
+//into the cart ,now these tokens and sessions contains some user information so again when you enter into website those 
+//will be visible in cart ,sessions or tokens also provides personalized experiences to users by storing information 
+//about users preferences,settings or past interactions (what he searched previously ,what theme did he choose all these are
+//stored in sessions or tokens)  
+//whenever we enter into a website(sends a login request) for example like a flipkart for the first time then first server checks from database
+//if user is authenticated then request is granted also since it is first time server creates a file called session file
+//in json format this file will also have a unique id called sessionid and it will be stored by the server in database
+//and in terms of response server sends cookie to us ,now cookie is kind of a small file which contains sessionid 
+//so next time suppose user wants to see coupon or profile page then he will also send the cookie (user sends a new request
+//(with cookie)),this cookie contains session id so the server looks up in the database for the id found in cookie ,if 
+//the id is found it sends the requested pages to user,so cookies generally contain information about users browser 
+//activity that means what we have searched,interaction with website-where did we go on the website ,preferences 
+//so along with session id the cookies contain the following above information 
+//your browser automatically includes the cookie in the http requests it sends to website server 
+//session cookies,persistent cookies 
+//cookies storage -the cookies we receive from server are stored here but not mandatory that they are stored here only 
+//local storage-some usefull information regarding the websites is stored locally in our browser example when i am visiting
+//apple website then loading time may be less because all those pictures etc are stored in local storage ,session storage
+//similar to local storage but its scope is limited to a particular browsing session 
+//token based authentication 
+//whenever user sends a login request the server authenticates the user by looking for username and password at database
+//and server sends a token to the user(this token is stored in local storage) now when we again enter into the website then this token is also sent along http
+//request ,now how is it verified-now we know that the token is actually made by using secret key so when it is sent to
+//server ,it checks the key so the server validates the token using secret key so if its valid the user will be granted
+//access to that particular web page so it is less strenious task whereas in cookies it used to check from database and
+//and again database saying to server that session file is present or not by checking with sesion id 
+//(tokens are also stored in cookies storage-doubt )
+//here one thing dont forget that when server gives cookie to user containing session id currespondingly that session id
+//is also stored in the database 
+//JWT(json web token)-it is a specific type of token format and whenever it is transmitted it is transmitted in the form
+//of json object ,JWTS are usefull for both authorization and authentication 
+//statelessness-JWTS are stateless that means server nead not store the token info in database like session it just verifies
+//tokens with the help of signature so this jwt has three parts header,payload and signature 
+//header-the header part defines what cryptographic algorithm we use to create this token ,and type of token-jwt ,payload,and signature
+//what we are creating by using secret key
+//we know that some user info is stored inside token ,when user enters username and password the token generated obviously 
+//must contain some info that server later fetches or decrypts and also we give some sort of payload through which it is 
+//identified that token is from this user only 
+//signature-verifies the integrity of token that its not tampered or expired,now this signature is created by encoding 
+//header,payload,a secret key and applying specified algorithm to generate the signature,so whenever token is sent along
+//the request it is verified by server using signature(using secret key which is generated during creation) 
+//so we specify some unique thing about user in the payload which is used to identify the user
+//see diagram and know that token will be stored at the browser itself
+//in jwt we have two functions called jwt.sign() and jwt.verify() ,jwt.sign() function is used to create the token 
+//so jwt.sign() creates a jwt token based on payload-a unique thing about user which is used to identify user,secret key
+//and another is optional parameters -which might contain algorithm if you want to use your own algorithm instead of
+//jwt and in optional parameters we also have expiresIn-which specifies the validity of token 
+//we have jwt.verify() function which has parameters token and secret key 
+// route /signup will create user,then he should get the token now it may be possible that user lost the token so for that
+//we have to create the login page also (he will put username and password in that if its present in database he is 
+//authenticated and then if he is authenticated he will receive a token),in our code the localauthmiddleware provides 
+//protection at every route of person but in that case to access every route we need to specify username and password
+//so here we dont want it to happen and we want it to happen through token 
+//we want in signup route when person is created we want token to be sent from server 
+//once the token has expiry date until that only token will be valid now so again we cannot tell the user to enter the 
+//entire data (that means we cannot again create person) so we will have login page through which he will enter username
+//and password and he will get the token 
+//hence in this way with the help of token without any username or password we can access any protected routes 

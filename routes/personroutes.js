@@ -2,8 +2,24 @@
 const express=require('express')
 const router=express.Router()
 const Person=require('./../models/person')//export the model called Person
-
-router.get('/',async (req,res)=>{//here we are using async because there is certain dboperation that takes time
+const {jwtauthmiddleware,generatetoken}=require('./jwt')
+//profile route 
+router.get('/profile',jwtauthmiddleware,async (req,res)=>{
+  try{
+           const userdata=req.user//here what is user check from the jwtauthmiddleware 
+           console.log(userdata)
+           //now in this userdata we also have id using this id we can find the person also 
+           const userid=userdata.id
+           const user=await Person.findById(userid)
+           res.status(200).json(user)
+  }catch(err){
+    console.log(err) 
+    res.status(500).json({error:'internal server eroor'})
+  }
+  //here simply from token we fetched id and using that id we got the entire person data
+  //in this we through token any persond data or profile can be displayed
+})
+router.get('/',jwtauthmiddleware,async (req,res)=>{//here we are using async because there is certain dboperation that takes time
     try{
   
     const data=await Person.find()
@@ -18,7 +34,7 @@ router.get('/',async (req,res)=>{//here we are using async because there is cert
         res.status(500).json({error:'internal server eroor'})
     }
    })
-   router.post('/',async (req,res)=>{//here we are using async because there is certain dboperation that takes time
+   router.post('/signup',async (req,res)=>{//here we are using async because there is certain dboperation that takes time
     try{
   //here whatever data we are getting it is being stored in req.body 
     const data=req.body 
@@ -26,13 +42,49 @@ router.get('/',async (req,res)=>{//here we are using async because there is cert
     const response=await newperson.save()//save the new person to database,here await is used so that we have to wait
     //until this db operation-wait is completed
     console.log("data saved")
-    res.status(200).json(response)
+    const payload={
+      id:response.id,
+      username:response.username
+    }
+    console.log(JSON.stringify(payload))
+    const token=generatetoken(payload)//this function needs payload as input payload can be any users info
+    console.log("token is:",token)
+    res.status(200).json({response:response,token:token})//here we are sending token also along with response
+    //now it is returning the data as a response we want token to be returned here 
+    
   
     }catch(err){
         //if in the above error happens in the catch block in saving 
         //then for that catch block is present to handle that error 
         console.log(err) 
         res.status(500).json({error:'internal server eroor'})
+    }
+   })
+   // /login route
+   router.post('/login',async(req,res)=>{
+    try{
+      //extract username and password from request body 
+      const {username,password}=req.body 
+      //now we have to check in database for the username 
+      const user=await Person.findOne({username:username})
+      //if user does not exist or password does not match return error 
+      if(!user || !(await user.comparePassword(password))) {//it might have two cases user is not present or password
+        //might be incorrect 
+         return res.status(401).json({error:'invalid username or password'})
+         
+      }
+      //if username is correct and password is correct then we will generate token for that we need payload
+      const payload={
+        id:user.id,
+        username:user.username//before through findone that particular userdata is present in user
+      }
+      const token=generatetoken(payload)
+      //return token as response 
+      res.json({token})
+
+    }catch(err){
+           console.log(err)
+           res.status(500).json({error:"internal server error"})
     }
    })
    router.get('/:worktype',async (req,res)=>{
